@@ -1,0 +1,265 @@
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
+#include <Wire.h>
+#include "DHT.h"
+#include <DHT_U.h>
+
+#define DHTPIN 5
+#define DHTTYPE  DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
+
+
+String Topik;
+String r1;
+String r2;
+String r3;
+String r4;
+int durum = 0 ;
+int durum2 = 0 ;
+int durum3 = 0 ;
+int durum4 = 0 ;
+String durumne;
+char message_buff[100];
+
+float tempc , nem;
+ 
+const char* ssid = "Robi"; // Enter your WiFi name  NetMASTER Uydunet-628C
+const char* password =  "123789456T"; // Enter WiFi password d81b8939
+const char* mqttServer = "postman.cloudmqtt.com";
+const int mqttPort = 16840;
+const char* mqttUser = "gjhmzecv";
+const char* mqttPassword = "JF6z3FvfdFca";
+
+unsigned long previousMillis = 0;
+const long interval = 5000;  
+
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+int role1 = 4;
+int role2 = 14;
+int role3 = 12;
+int role4 = 13;
+
+void setup() {
+  // put your setup code here, to run once:
+
+pinMode(role1,OUTPUT);
+pinMode(role2,OUTPUT);
+pinMode(role3,OUTPUT);
+pinMode(role4,OUTPUT);
+
+
+Serial.begin(115200);
+ 
+  WiFi.begin(ssid, password);
+ 
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("Connecting to WiFi..");
+  }
+  Serial.println("Connected to the WiFi network");
+ 
+  client.setServer(mqttServer, mqttPort);
+  client.setCallback(callback);
+ 
+  while (!client.connected()) {
+    Serial.println("Connecting to MQTT...");
+ 
+    if (client.connect("ESP8266Client", mqttUser, mqttPassword )) {
+ 
+      Serial.println("connected");  
+ 
+    } else {
+ 
+      Serial.print("failed with state ");
+      Serial.print(client.state());
+      delay(2000);
+ 
+    }
+  }
+ 
+  
+  
+  client.subscribe("sicaklik");
+  client.subscribe("nem");
+  client.subscribe("r1gelen");
+   client.subscribe("r1deger");
+  client.subscribe("r2gelen");
+  client.subscribe("r2deger");
+  client.subscribe("r3deger");
+ 
+  client.subscribe("r3gelen");
+  client.subscribe("r4deger");
+  client.subscribe("r4gelen");
+  
+  client.publish("r1gelen", "sondu");
+  client.publish("r2gelen", "sondu");
+  client.publish("r3gelen", "sondu");
+  client.publish("r4gelen", "sondu");
+  client.subscribe("durumgonder");
+  
+  dht.begin();
+
+  digitalWrite(role1,LOW);
+  digitalWrite(role2,LOW);
+  digitalWrite(role3,LOW);
+  digitalWrite(role4,LOW);
+        
+}
+
+void sic_nem(){
+  tempc= dht.readTemperature();
+  
+    nem= dht.readHumidity();
+    
+client.publish("sicaklik", String(tempc).c_str());
+    client.publish("nem",String(nem).c_str());
+    Serial.println(tempc);
+    Serial.println(nem);
+    
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+ int i = 0;
+  //Serial.print("Message arrived in topic: ");
+ //Serial.println(topic);
+   Topik = String (topic);
+// Serial.print("Message:");
+  for (i = 0; i < length; i++) {
+ // Serial.print((char)payload[i]);
+    message_buff[i] = ((char)payload[i]);
+  }
+  message_buff[i] = '\0';
+
+
+ if (Topik == "r1deger"){
+  r1 = (message_buff);
+}
+if (Topik == "r2deger"){
+  r2 = (message_buff);
+}
+if (Topik == "r3deger"){
+  r3 = (message_buff);
+}
+if (Topik == "r4deger"){
+  r4 = (message_buff);
+}
+
+if (Topik == "durumgonder"){
+ durumne = String (message_buff);
+ }
+ }
+ 
+void loop() {
+  // put your main code here, to run repeatedly:
+client.loop();
+
+
+  
+  if ((r1 == "yak")&& (durum == 0)){
+    client.publish("r1gelen", "yandi");
+    durum = 1;
+  digitalWrite(role1,HIGH);
+ 
+   }
+  if ((r1 == "son")&& (durum == 1)) {
+    client.publish("r1gelen", "sondu");
+    durum = 0;
+    digitalWrite(role1,LOW);
+  
+   }
+
+   if ((r2== "yak")&& (durum2 == 0)){
+    client.publish("r2gelen", "yandi");
+    durum2 = 1;
+ digitalWrite(role2,HIGH); 
+  
+   }
+  if ((r2 == "son")&& (durum2 == 1)) {
+    client.publish("r2gelen", "sondu");
+    durum2 = 0;
+      digitalWrite(role2,LOW); 
+    }
+
+ if ((r3== "yak")&& (durum3 == 0)){
+    client.publish("r3gelen", "yandi");
+    durum3 = 1;
+ digitalWrite(role3,HIGH);
+  
+   }
+  if ((r3 == "son")&& (durum3 == 1)) {
+    client.publish("r3gelen", "sondu");
+    durum3 = 0;
+    digitalWrite(role3,LOW);
+    }
+    
+if ((r4== "yak")&& (durum4 == 0)){
+    client.publish("r4gelen", "yandi");
+    durum4 = 1;
+ digitalWrite(role4,HIGH);
+   }
+  if ((r4 == "son")&& (durum4 == 1)) {
+    client.publish("r4gelen", "sondu");
+    durum4 = 0;
+     digitalWrite(role4,LOW);  
+    }
+
+
+if (durumne == "gonder"){
+  if (durum == 0){
+  client.publish("r1gelen", "sondu");
+  Serial.println("r1 sondu");
+  }
+  delay(10);
+  if (durum == 1){
+  client.publish("r1gelen", "yandi");
+   Serial.println("r1 yandi");
+  }
+  delay(10);
+   if (durum2 == 0){
+  client.publish("r2gelen", "sondu");
+   Serial.println("r2 sondu");
+  }
+  delay(10);
+  if (durum2 == 1){
+  client.publish("r2gelen", "yandi");
+   Serial.println("r2 yandı");
+  }
+  delay(10);
+ if (durum3 == 0){
+  client.publish("r3gelen", "sondu");
+   Serial.println("r3 sondu");
+  }
+  delay(10);
+  if (durum3 == 1){
+  client.publish("r3gelen", "yandi");
+  Serial.println("r3 yandı");
+  }
+  delay(10);
+if (durum4 == 0){
+  client.publish("r4gelen", "sondu");
+   Serial.println("r4 sondu");
+  }
+  delay(10);
+  if (durum4 == 1){
+  client.publish("r4gelen", "yandi");
+    Serial.println("r4 yandı");
+  }
+  delay(10);
+    
+ durumne = "gonderildi";
+
+  Serial.println(durumne);
+}
+unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    // save the last time you blinked the LED
+    previousMillis = currentMillis;
+    sic_nem();
+    
+  }
+
+}
