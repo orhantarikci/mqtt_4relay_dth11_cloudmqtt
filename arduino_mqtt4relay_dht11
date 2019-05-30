@@ -32,7 +32,7 @@ const char* mqttUser = "gjhmzecv";
 const char* mqttPassword = "JF6z3FvfdFca";
 
 unsigned long previousMillis = 0;
-const long interval = 5000;  
+const long interval = 10000;  
 
 
 WiFiClient espClient;
@@ -115,10 +115,7 @@ void sic_nem(){
   
     nem= dht.readHumidity();
     
-client.publish("sicaklik", String(tempc).c_str());
-    client.publish("nem",String(nem).c_str());
-    Serial.println(tempc);
-    Serial.println(nem);
+  
     
 }
 
@@ -156,7 +153,7 @@ if (Topik == "durumgonder"){
 void loop() {
   // put your main code here, to run repeatedly:
 client.loop();
-
+sic_nem();
 
   
   if ((r1 == "yak")&& (durum == 0)){
@@ -213,42 +210,42 @@ if (durumne == "gonder"){
   client.publish("r1gelen", "sondu");
   Serial.println("r1 sondu");
   }
-  delay(10);
+  //delay(10);
   if (durum == 1){
   client.publish("r1gelen", "yandi");
    Serial.println("r1 yandi");
   }
-  delay(10);
+  //delay(10);
    if (durum2 == 0){
   client.publish("r2gelen", "sondu");
    Serial.println("r2 sondu");
   }
-  delay(10);
+  ///delay(10);
   if (durum2 == 1){
   client.publish("r2gelen", "yandi");
    Serial.println("r2 yandı");
   }
-  delay(10);
+  //delay(10);
  if (durum3 == 0){
   client.publish("r3gelen", "sondu");
    Serial.println("r3 sondu");
   }
-  delay(10);
+  //delay(10);
   if (durum3 == 1){
   client.publish("r3gelen", "yandi");
   Serial.println("r3 yandı");
   }
-  delay(10);
+  //delay(10);
 if (durum4 == 0){
   client.publish("r4gelen", "sondu");
    Serial.println("r4 sondu");
   }
-  delay(10);
+  //delay(10);
   if (durum4 == 1){
   client.publish("r4gelen", "yandi");
     Serial.println("r4 yandı");
   }
-  delay(10);
+  //delay(10);
     
  durumne = "gonderildi";
 
@@ -258,8 +255,55 @@ unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     // save the last time you blinked the LED
     previousMillis = currentMillis;
-    sic_nem();
+    Serial.println(tempc);
+    Serial.println(nem);
+    client.publish("sicaklik", String(tempc).c_str());
+    client.publish("nem",String(nem).c_str());
+  
+
+
+if (durum == 0){
+  client.publish("r1gelen", "sondu");
+  Serial.println("r1 sondu");
+  }
+  
+  if (durum == 1){
+  client.publish("r1gelen", "yandi");
+   Serial.println("r1 yandi");
+  }
+  
+   if (durum2 == 0){
+  client.publish("r2gelen", "sondu");
+   Serial.println("r2 sondu");
+  }
+  
+  if (durum2 == 1){
+  client.publish("r2gelen", "yandi");
+   Serial.println("r2 yandı");
+  }
+ 
+ if (durum3 == 0){
+  client.publish("r3gelen", "sondu");
+   Serial.println("r3 sondu");
+  }
+ 
+  if (durum3 == 1){
+  client.publish("r3gelen", "yandi");
+  Serial.println("r3 yandı");
+  }
+  delay(10);
+if (durum4 == 0){
+  client.publish("r4gelen", "sondu");
+   Serial.println("r4 sondu");
+  }
+  
+  if (durum4 == 1){
+  client.publish("r4gelen", "yandi");
+    Serial.println("r4 yandı");
+  }
+ 
     
+  
   }
 
 }
