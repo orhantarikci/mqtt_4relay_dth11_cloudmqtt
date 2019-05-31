@@ -24,12 +24,12 @@ char message_buff[100];
 
 float tempc , nem;
  
-const char* ssid = "Robi"; // Enter your WiFi name  NetMASTER Uydunet-628C
-const char* password =  "123789456T"; // Enter WiFi password d81b8939
-const char* mqttServer = "postman.cloudmqtt.com";
-const int mqttPort = 16840;
-const char* mqttUser = "gjhmzecv";
-const char* mqttPassword = "JF6z3FvfdFca";
+const char* ssid = "SSID"; // Enter your WiFi name 
+const char* password =  ""; // Enter WiFi password 
+const char* mqttServer = "";
+const int mqttPort = ;
+const char* mqttUser = "";
+const char* mqttPassword = "";
 
 unsigned long previousMillis = 0;
 const long interval = 10000;  
